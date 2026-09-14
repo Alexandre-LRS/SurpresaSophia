@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para minha Sophia</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --roxo-principal: #8432E3;
+            --roxo-claro: #a865f0;
+            --roxo-escuro: #6521b3;
+            --amarelo-principal: #F5D133;
+            --verde-principal: #2D5223;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            background-color: #ffffff; /* Fundo branco limpo */
+        }
+
+        .font-dancing {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100vh;
+            transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+        }
+        
+        .fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .fade-in {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        #intro-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, var(--roxo-claro) 0%, var(--roxo-principal) 100%);
+            z-index: 50;
+        }
+
+        .envelope-container {
+            position: relative;
+            width: 320px;
+            height: 220px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            -webkit-tap-highlight-color: transparent; /* Remove flash azul no mobile */
+        }
+
+        .envelope-container:hover {
+            transform: scale(1.05) translateY(-5px);
+        }
+
+        .envelope-base {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--roxo-escuro);
+            border-radius: 8px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .letter {
+            position: absolute;
+            bottom: 10px;
+            left: 5%;
+            width: 90%;
+            height: 90%;
+            background-color: #fffaf0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 1s ease-in-out;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 25px;
+            border: 2px dashed var(--amarelo-principal);
+        }
+
+        .flap-left, .flap-right, .flap-bottom, .flap-top {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .flap-left {
+            bottom: 0;
+            left: 0;
+            border-top: 110px solid transparent;
+            border-bottom: 110px solid transparent;
+            border-left: 160px solid var(--roxo-claro);
+            z-index: 3;
+            border-bottom-left-radius: 8px;
+        }
+
+        .flap-right {
+            bottom: 0;
+            right: 0;
+            border-top: 110px solid transparent;
+            border-bottom: 110px solid transparent;
+            border-right: 160px solid var(--roxo-claro);
+            z-index: 3;
+            border-bottom-right-radius: 8px;
+        }
+
+        .flap-bottom {
+            bottom: 0;
+            left: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-bottom: 120px solid var(--roxo-principal);
+            z-index: 4;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .flap-top {
+            top: 0;
+            left: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 120px solid var(--roxo-principal);
+            z-index: 5;
+            transform-origin: top;
+            transition: transform 0.8s ease-in-out, z-index 0s 0.4s;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        /* Sêlo do envelope */
+        .seal {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background-color: var(--amarelo-principal);
+            border-radius: 50%;
+            z-index: 6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: opacity 0.3s;
+        }
+
+        /* Animação de Abertura */
+        .envelope-container.open .flap-top {
+            transform: rotateX(180deg);
+            z-index: 1; 
+        }
+        
+        .envelope-container.open .seal {
+            opacity: 0;
+        }
+
+        .envelope-container.open .letter {
+            transform: translateY(-80px);
+            z-index: 4;
+        }
+
+        .click-text {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--amarelo-principal);
+            color: var(--verde-principal);
+            padding: 10px 24px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            animation: pulse 2s infinite;
+            box-shadow: 0 4px 15px rgba(245, 209, 51, 0.5);
+            pointer-events: none; /* Deixa o clique passar para o envelope */
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+
+        #main-screen {
+            opacity: 0;
+            visibility: hidden;
+            position: relative;
+            background-color: #ffffff;
+        }
+
+        .polaroid {
+            background: white;
+            padding: 15px 15px 45px 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+            border-radius: 4px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            border: 1px solid #f0f0f0;
+        }
+
+        .polaroid:hover {
+            transform: scale(1.03) rotate(0deg) !important;
+            z-index: 10;
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: auto;
+            border-radius: 2px;
+            object-fit: cover;
+            /* Proporção levemente ajustada para ficar mais natural que quadrado perfeito */
+            aspect-ratio: 4/5; 
+        }
+
+        .tape {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 100px;
+            height: 30px;
+            background-color: rgba(245, 209, 51, 0.6); 
+            z-index: 2;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .tape.green { background-color: rgba(45, 82, 35, 0.4); }
+        .tape.purple { background-color: rgba(132, 50, 227, 0.4); }
+
+        .sunflower-bg {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0.04; /* Marca d'água bem suave para não atrapalhar a leitura */
+            z-index: 0;
+        }
+
+        .sunflower-1 { top: -5%; left: -5%; width: 400px; transform: rotate(15deg); }
+        .sunflower-2 { bottom: -10%; right: -5%; width: 500px; transform: rotate(-20deg); }
+        .sunflower-3 { top: 40%; left: -10%; width: 300px; transform: rotate(45deg); opacity: 0.03; }
+
+    </style>
+</head>
+<body>
+
+    <div id="intro-screen" class="screen">
+        <div class="envelope-container" id="envelope">
+            <div class="envelope-base"></div>
+            
+            <div class="letter">
+                <span class="font-dancing text-3xl" style="color: var(--roxo-escuro);">Para</span>
+                <span class="font-dancing text-4xl mt-1" style="color: var(--verde-principal);">minha Sophia</span>
+                <span class="text-3xl mt-3">❤️</span>
+            </div>
+            
+            <div class="flap-bottom"></div>
+            <div class="flap-left"></div>
+            <div class="flap-right"></div>
+            <div class="flap-top"></div>
+            
+            <div class="seal">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#2D5223" class="w-6 h-6">
+                    <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                </svg>
+            </div>
+
+            <div class="click-text shadow-lg">Clique para abrir 💌</div>
+        </div>
+    </div>
+
+    <div id="main-screen" class="screen pb-24">
+        
+        <!-- Girassóis Estáticos (SVG Watermarks) -->
+        <svg class="sunflower-bg sunflower-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g fill="#000000"> <!-- A cor é preta mas a opacidade via CSS deixa cinza clarinho/marca d'água -->
+                <circle cx="50" cy="50" r="15"/>
+                <!-- Pétalas simplificadas -->
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(0 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(30 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(60 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(90 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(120 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(150 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(180 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(210 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(240 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(270 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(300 50 50)"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(330 50 50)"/>
+            </g>
+        </svg>
+
+        <svg class="sunflower-bg sunflower-2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g fill="#000000">
+                <circle cx="50" cy="50" r="15"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(0 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(30 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(60 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(90 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(120 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(150 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(180 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(210 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(240 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(270 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(300 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(330 50 50)"/>
+            </g>
+        </svg>
+        
+        <svg class="sunflower-bg sunflower-3" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g fill="#000000">
+                <circle cx="50" cy="50" r="15"/>
+                <path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(0 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(30 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(60 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(90 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(120 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(150 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(180 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(210 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(240 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(270 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(300 50 50)"/><path d="M50,10 C55,30 45,30 50,10 Z" transform="rotate(330 50 50)"/>
+            </g>
+        </svg>
+
+        <div class="container mx-auto px-6 pt-20 max-w-5xl relative z-10">
+            
+            <!-- Título -->
+            <div class="text-center mb-20">
+                <h1 class="font-dancing text-6xl md:text-7xl mb-6" style="color: var(--roxo-escuro);">Para minha Sophia</h1>
+                <p class="text-xl md:text-2xl font-light text-gray-700 max-w-3xl mx-auto leading-relaxed" style="color: var(--verde-principal);">
+                    "Você sempre foi o brilho que faltava em minha vida, meu conforto, meu bem."
+                </p>
+            </div>
+
+            <div class="space-y-32">
+                
+                <!-- Foto 1 (Esquerda no PC, Topo no Mobile) -->
+                <!-- Nota de Layout: A div da foto sempre vem primeiro no DOM. Usamos md:flex-row para a foto ficar na esquerda -->
+                <div class="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
+                    <div class="w-full md:w-5/12 lg:w-4/12 flex justify-center">
+                        <div class="polaroid w-4/5 md:w-full" style="transform: rotate(2deg);">
+                            <div class="tape purple"></div>
+                            <img src="cca8979b-47f3-4354-9353-4732f20fe06d (1).jpg" alt="Momento Especial 1">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 text-center md:text-left">
+                        <p class="text-xl md:text-2xl text-gray-800 leading-relaxed font-light">
+                            Uma das minhas favoritas. Cada momento ao seu lado é um presente que eu guardo com todo carinho.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Foto 2 (Direita no PC, Topo no Mobile) -->
+                <!-- Nota de Layout: Usamos md:flex-row-reverse para a foto ir para a direita no desktop -->
+                <div class="flex flex-col md:flex-row-reverse items-center justify-center gap-10 md:gap-16">
+                    <div class="w-full md:w-5/12 lg:w-4/12 flex justify-center">
+                        <div class="polaroid w-4/5 md:w-full" style="transform: rotate(-3deg);">
+                            <div class="tape green"></div>
+                            <img src="2 (1).jpg" alt="Momento Especial 2">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 text-center md:text-right">
+                        <p class="text-xl md:text-2xl text-gray-800 leading-relaxed font-light">
+                            Nossas viagens, nossos risos, nossa paz. Você é o meu lugar favorito no mundo.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Foto 3 (Esquerda no PC, Topo no Mobile) -->
+                <div class="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
+                    <div class="w-full md:w-5/12 lg:w-4/12 flex justify-center">
+                        <div class="polaroid w-4/5 md:w-full" style="transform: rotate(3deg);">
+                            <div class="tape"></div>
+                            <img src="1 (1).jpg" alt="Momento Especial 3">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 text-center md:text-left">
+                        <p class="text-xl md:text-2xl text-gray-800 leading-relaxed font-light">
+                            Até nos dias mais simples, a gente sabe fazer ser especial. Amo a nossa sintonia.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Foto 4 (Direita no PC, Topo no Mobile) -->
+                <div class="flex flex-col md:flex-row-reverse items-center justify-center gap-10 md:gap-16">
+                    <div class="w-full md:w-5/12 lg:w-4/12 flex justify-center">
+                        <div class="polaroid w-4/5 md:w-full" style="transform: rotate(-2deg);">
+                            <div class="tape purple"></div>
+                            <img src="9bf0c210-603f-4f3a-a7ba-b210aba18ce6 (2).jpg" alt="Momento Especial 4">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 text-center md:text-right">
+                        <p class="text-xl md:text-2xl text-gray-800 leading-relaxed font-light">
+                            O melhor beijo, o melhor abraço, o melhor dengo. Sou apaixonado por cada detalhe seu.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Foto 5 (Esquerda no PC, Topo no Mobile) -->
+                <div class="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16">
+                    <div class="w-full md:w-5/12 lg:w-4/12 flex justify-center">
+                        <div class="polaroid w-4/5 md:w-full" style="transform: rotate(2deg);">
+                            <div class="tape green"></div>
+                            <!-- Usando a foto solicitada na última requisição -->
+                            <img src="f6078b7c-cbf9-4c76-b126-3acc7267edeb (1).jpg" alt="Momento Especial 5">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 text-center md:text-left">
+                        <p class="text-xl md:text-2xl text-gray-800 leading-relaxed font-medium" style="color: var(--roxo-escuro);">
+                            E que seja sempre assim: nós dois, caminhando juntos, crescendo e nos amando mais a cada dia. Te amo, meu bem!
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="text-center mt-32 pb-10">
+                <span class="text-4xl">🌻 💜 🌻</span>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const envelope = document.getElementById('envelope');
+            const introScreen = document.getElementById('intro-screen');
+            const mainScreen = document.getElementById('main-screen');
+
+            // Evento unificado para clique e toque no celular
+            function openEnvelope() {
+                // Previne múltiplos cliques
+                if (envelope.classList.contains('open')) return;
+                
+                // Adiciona classe para animar a abertura do envelope
+                envelope.classList.add('open');
+                
+                // Aguarda a animação da carta e faz a transição de tela
+                setTimeout(() => {
+                    // Esmaece a tela de intro
+                    introScreen.classList.add('fade-out');
+                    
+                    setTimeout(() => {
+                        introScreen.style.display = 'none'; // Remove do fluxo visual
+                        mainScreen.classList.add('fade-in'); // Revela a página principal
+                        window.scrollTo(0, 0); // Garante que a tela começa no topo
+                    }, 1000); // tempo de espera do fade-out
+
+                }, 1500); // tempo de espera da animação do envelope subir
+            }
+
+            envelope.addEventListener('click', openEnvelope);
+        });
+    </script>
+</body>
+</html>

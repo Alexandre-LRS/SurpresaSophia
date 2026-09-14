@@ -264,6 +264,11 @@
 </head>
 <body>
 
+    <!-- Elemento de áudio adicionado -->
+    <audio id="meu-audio" loop preload="auto">
+        <source src="musica.mp3" type="audio/mp3">
+    </audio>
+
     <div id="intro-screen" class="screen">
         <div class="envelope-container" id="envelope">
             <div class="envelope-base"></div>
@@ -429,6 +434,7 @@
             const envelope = document.getElementById('envelope');
             const introScreen = document.getElementById('intro-screen');
             const mainScreen = document.getElementById('main-screen');
+            const audio = document.getElementById('meu-audio');
 
             // Evento unificado para clique e toque no celular
             function openEnvelope() {
@@ -438,6 +444,11 @@
                 // Adiciona classe para animar a abertura do envelope
                 envelope.classList.add('open');
                 
+                // Toca o áudio local com segurança
+                audio.play().catch(error => {
+                    console.log("Áudio aguardando interação.");
+                });
+
                 // Aguarda a animação da carta e faz a transição de tela
                 setTimeout(() => {
                     // Esmaece a tela de intro
